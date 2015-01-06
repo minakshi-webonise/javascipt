@@ -2,10 +2,11 @@
 
   //variable to store operands, operator and result
   var storage ={
-    operand1: null,
-    operand2: null,
     operator: null,
-    result: null
+    data1:"",
+    result: null,
+    data2: ""
+   
   }
   //called on load of doccument
   $(document).ready(function(){
@@ -20,49 +21,60 @@
      _bind.clearEvent()
   }
 
+  var _operate = {
+    saveValue: function(data) {
+      if(storage.operator == null) {
+        storage.data1 = storage.data1.concat(data)
+        _display.showDisplayValue(storage.data1)
+      }
+      else {
+        storage.data2 = storage.data2.concat(data)
+        _display.showDisplayValue(storage.data2)
+      }
+    }
+  }
+
+  //private method to display values in display box
+  var _display = {
+        showDisplayValue: function(data){
+      $(".display-box").val(data)
+    },
+    clear: function(){
+       $(".display-box").val('');
+    }
+  }
+  
   //private function bind which does data binding events for numbers, operators and display box
   var _bind = {
     bindingValues: function () {
       $(".num-button" ).click(function() {
-        $(".display-box").val($(".display-box").val() + $(this).attr('name'));
-        if(storage.operand1 != null){
-             // storage.operand1 = $(".display-box").val()
-          storage.operand2 = $(".display-box").val()
-          console.log("operand 2 : "+ storage.operand2)
-          console.log("ope1 "+ storage.operand1)
-        }
-        else{
-          console.log("missing operand1")
-        }
-     });
+        var data = $(this).data('val').toString()
+         _operate.saveValue(data)
+      });
     },
     bindingOperators: function () {
       $(".operation").click(function() {
-        storage.operand1 = $(".display-box").val()
-        console.log("ope1 "+ storage.operand1)
-        $(".display-box").val('')
+        _display.clear()
+         if(storage.operator != null) {
+          calc.Calculation(storage.data1,storage.data2,storage.operator)
+          _display.showDisplayValue(storage.result)
+          storage.data1 = storage.result
+          storage.data2 = ""
+        }
         storage.operator = $(this).text();
-        console.log("operator : " +storage.operator)
       });
-
     },
     clearEvent: function () {
       $(".clear").click(function() {
-        $(".display-box").val('');
+        _display.clear()
       });
     },
     bindingEqual: function () {
       $(".equals" ).click(function() {
-        console.log("in eyasls")
-        if(storage.operand1 != null && storage.operand2 != null &&
+        if(storage.data1 != null && storage.data2 != null &&
           storage.operator != null) {
-          calc.Calculation(storage.operand1,storage.operand2,storage.operator)
-          $(".display-box").val('')
-          $(".display-box").val(storage.result)
-          storage.operand1 = null;
-          storage.operand2 = null;
-          storage.operator = null;
-          storage.result = null;
+          calc.Calculation(storage.data1,storage.data2,storage.operator)
+          _display.showDisplayValue(storage.result)
       }
       });
     }
@@ -73,13 +85,11 @@
     this.op1 = parseInt(op1,10);
     this.op2 = parseInt(op2,10);
     this.op = op;
-    console.log("called happy if" + op1)
     _calculate.operation(this.op1,this.op2,this.op)
 
   };
   var _calculate = {
      operation: function (op1,op2,op) {
-      console.log("fdsfsdf")
       switch (op) {
         case '+':
           storage.result = op1 + op2;
@@ -99,9 +109,5 @@
     }
 
   }
-  // calc.Calculation.prototype.operate= function(arg1, arg2, operator) {
-  //     var b = $(".some").val()
-  //   // console.log(b)
-  // };
 
 })(window.Calculator = window.Calculator || {}, jQuery)
